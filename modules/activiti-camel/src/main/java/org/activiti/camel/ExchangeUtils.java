@@ -1,3 +1,5 @@
+// vim: set expandtab:
+// vim: ts=2 sw=2:
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,9 +54,11 @@ public class ExchangeUtils {
       camelVarMap = exchange.getProperties();
       // filter camel property that can't be serializable for camel version after 2.12.x+
       Map<String, Object> newCamelVarMap = new HashMap<String, Object>();
-      for (String s : camelVarMap.keySet()) {
-        if (IGNORE_MESSAGE_PROPERTY.equalsIgnoreCase(s) == false) {
-          newCamelVarMap.put(s, camelVarMap.get(s));
+      for (Map.Entry< String, Object > e : camelVarMap.entrySet()) {
+        if (IGNORE_MESSAGE_PROPERTY.equalsIgnoreCase(e.getKey()) == false
+          && activitiEndpoint.filterVariableName(e.getKey())
+          && activitiEndpoint.filterSerializable(e.getValue())) {
+          newCamelVarMap.put(e.getKey(), e.getValue());
         }
       }
       camelVarMap = newCamelVarMap;
@@ -71,7 +75,7 @@ public class ExchangeUtils {
       if(camelBody instanceof Map<?,?>) {
         Map<?,?> camelBodyMap = (Map<?,?>)camelBody;
         for (@SuppressWarnings("rawtypes") Map.Entry e : camelBodyMap.entrySet()) {
-          if (e.getKey() instanceof String) {
+          if (e.getKey() instanceof String && activitiEndpoint.filterSerializable( e.getValue() ) ) {
             camelVarMap.put((String) e.getKey(), e.getValue());
           }
         }
@@ -84,7 +88,10 @@ public class ExchangeUtils {
 
       if(activitiEndpoint.isCopyVariablesFromHeader()) {
         for(Map.Entry<String, Object> header : exchange.getIn().getHeaders().entrySet()) {
-    	  camelVarMap.put(header.getKey(), header.getValue());
+          if ( activitiEndpoint.filterVariableName(header.getKey())
+            && activitiEndpoint.filterSerializable(header.getValue()) ) {
+            camelVarMap.put(header.getKey(), header.getValue());
+          }
         }
       }
     }

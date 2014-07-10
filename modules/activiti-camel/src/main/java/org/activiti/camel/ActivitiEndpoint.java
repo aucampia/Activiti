@@ -1,3 +1,5 @@
+// vim: set expandtab:
+// vim: ts=2 sw=2:
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +22,10 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.impl.DefaultEndpoint;
+
+import java.util.Set;
+import java.util.HashSet;
+import java.io.Serializable;
 
 /**
  * This class has been modified to be consistent with the changes to CamelBehavior and its implementations. The set of changes
@@ -48,6 +54,12 @@ public class ActivitiEndpoint extends DefaultEndpoint {
   
   private boolean copyCamelBodyToBodyAsString;
   
+  private boolean copyOnlyFromSerializable;
+
+  private Set<String> includeVariables = null;
+
+  private Set<String> excludeVariables = null;
+
   private long timeout = 5000;
   
   private int timeResolution = 100;
@@ -137,6 +149,41 @@ public class ActivitiEndpoint extends DefaultEndpoint {
     this.copyCamelBodyToBodyAsString = copyCamelBodyToBodyAsString;
   }
   
+  public boolean isCopyOnlyFromSerializable() {
+    return copyOnlyFromSerializable;
+  }
+
+  public void setCopyOnlyFromSerializable(boolean copyCamelBodyToBodyAsString) {
+    this.copyOnlyFromSerializable = copyOnlyFromSerializable;
+  }
+
+  public boolean filterSerializable( Object o )
+  {
+    return ( !isCopyOnlyFromSerializable() || o instanceof Serializable );
+  }
+
+  public Set<String> getIncludeVariables() {
+    return includeVariables;
+  }
+
+  public void setIncludeVariables(Set<String> includeVariables) {
+    this.includeVariables = includeVariables;
+  }
+
+  public Set<String> getExcludeVariables() {
+    return excludeVariables;
+  }
+
+  public void setExcludeVariables(Set<String> excludeVariables) {
+    this.excludeVariables = excludeVariables;
+  }
+
+  public boolean filterVariableName( String variableName ) {
+    boolean include = ( getIncludeVariables() == null || getIncludeVariables().contains( variableName ) );
+    boolean exclude = ( getExcludeVariables() != null && getExcludeVariables().contains( variableName ) );
+    return ( include && !exclude );
+  }
+
   @Override
   public boolean isLenientProperties() {
     return true;
