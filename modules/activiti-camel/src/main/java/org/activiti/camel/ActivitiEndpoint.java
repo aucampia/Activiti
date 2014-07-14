@@ -22,6 +22,7 @@ import org.apache.camel.impl.DefaultEndpoint;
 import java.util.Set;
 import java.util.HashSet;
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * This class has been modified to be consistent with the changes to CamelBehavior and its implementations. The set of changes
@@ -145,7 +146,7 @@ public class ActivitiEndpoint extends DefaultEndpoint {
     return copyOnlyFromSerializable;
   }
 
-  public void setCopyOnlyFromSerializable(boolean copyCamelBodyToBodyAsString) {
+  public void setCopyOnlyFromSerializable(boolean copyOnlyFromSerializable) {
     this.copyOnlyFromSerializable = copyOnlyFromSerializable;
   }
 
@@ -158,19 +159,19 @@ public class ActivitiEndpoint extends DefaultEndpoint {
     return includeVariables;
   }
 
-  public void setIncludeVariables(Set<String> includeVariables) {
-    this.includeVariables = includeVariables;
+  public void setIncludeVariables(String includeVariables) {
+    this.includeVariables = new HashSet<String>(Arrays.asList(includeVariables.split(",")));
   }
 
   public Set<String> getExcludeVariables() {
     return excludeVariables;
   }
 
-  public void setExcludeVariables(Set<String> excludeVariables) {
-    this.excludeVariables = excludeVariables;
+  public void setExcludeVariables(String excludeVariables) {
+    this.excludeVariables = new HashSet<String>(Arrays.asList(excludeVariables.split(",")));
   }
 
-  public boolean filterVariableName( String variableName ) {
+  public boolean filterVariableName(String variableName) {
     boolean include = ( getIncludeVariables() == null || getIncludeVariables().contains( variableName ) );
     boolean exclude = ( getExcludeVariables() != null && getExcludeVariables().contains( variableName ) );
     return ( include && !exclude );
